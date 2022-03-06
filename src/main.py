@@ -9,9 +9,11 @@ load_dotenv()  # take environment variables from .env.
 
 app = Flask(__name__)
 app.config["MONGODB_SETTINGS"] = {
-    "db": os.getenv("MONGODB_NAME"),
-    "host": "localhost",
-    "port": 27017,
+    "db": os.getenv("MONGO_INITDB_DATABASE"),
+    "host": os.getenv("MONGO_HOST"),
+    "port": int(os.getenv("MONGO_PORT")),
+    "username": os.getenv("MONGO_INITDB_ROOT_USERNAME"),
+    "password": os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
 }
 db = MongoEngine()
 db.init_app(app)
@@ -24,6 +26,11 @@ class User(db.Document):
 
     def to_json(self):
         return {"id": self.id, "name": self.name, "age": self.age}
+
+
+@app.route("/", methods=["GET"])
+def health_check():
+    return jsonify({"status": "OK"}), 200
 
 
 @app.route("/user", methods=["GET"])
