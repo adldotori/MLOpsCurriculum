@@ -33,13 +33,13 @@ def health_check():
     return jsonify({"status": "OK"}), 200
 
 
-@app.route("/user", methods=["GET"])
+@app.route("/users", methods=["GET"])
 def get_all_users():
     user = User.objects.all()
     return jsonify([i.to_json() for i in user]), 200
 
 
-@app.route("/user/<id>", methods=["GET"])
+@app.route("/users/<id>", methods=["GET"])
 def get_user(id):
     user = User.objects(id=id).first()
     if not user:
@@ -48,7 +48,7 @@ def get_user(id):
         return jsonify(user.to_json()), 200
 
 
-@app.route("/user", methods=["POST"])
+@app.route("/users", methods=["POST"])
 def create_user():
     record = json.loads(request.data)
     if len(User.objects.all()) > 0:
@@ -63,7 +63,7 @@ def create_user():
     return jsonify({"success": True}), 201
 
 
-@app.route("/user/<id>", methods=["PUT"])
+@app.route("/users/<id>", methods=["PUT"])
 def update_user(id):
     record = json.loads(request.data)
     user = User.objects(id=id).first()
@@ -77,7 +77,7 @@ def update_user(id):
         return jsonify({"success": True}), 201
 
 
-@app.route("/user/<id>", methods=["DELETE"])
+@app.route("/users/<id>", methods=["DELETE"])
 def delete_user(id):
     user = User.objects(id=id).first()
     if not user:
