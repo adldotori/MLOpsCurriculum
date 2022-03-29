@@ -5,6 +5,15 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_mongoengine import MongoEngine
 
+from error import (
+    UserNotFoundError,
+    NameIsEmptyError,
+    NameAlreadyExistsError,
+    InvalidIdError,
+    InvalidAgeError,
+    error_handle,
+)
+
 load_dotenv()  # take environment variables from .env.
 
 app = Flask(__name__)
@@ -17,6 +26,7 @@ app.config["MONGODB_SETTINGS"] = {
 }
 db = MongoEngine()
 db.init_app(app)
+error_handle(app)
 
 
 class User(db.Document):
@@ -41,9 +51,13 @@ def get_all_users():
 
 @app.route("/users/<id>", methods=["GET"])
 def get_user(id):
+    if not isinstance(id, int) or id < 0:
+        raise InvalidIdError()
+
     user = User.objects(id=id).first()
+
     if not user:
-        return jsonify({"error": "data not found"}), 404
+        return UserNotFoundError()
     else:
         return jsonify(user.to_json()), 200
 
@@ -51,40 +65,65 @@ def get_user(id):
 @app.route("/users", methods=["POST"])
 def create_user():
     record = json.loads(request.data)
+
+    if "name" not in record:
+        raise NameIsEmptyError()
+
+    if "age" in record and not isinstance(record["age"], int):
+        raise InvalidAgeError()
+
+    if len(User.objects(name=record["name"])) > 0:
+        raise NameAlreadyExistsError()
+
     if len(User.objects.all()) > 0:
         id = User.objects.all().order_by("-id").first()["id"] + 1
     else:
         id = 1
+
     user = User(id=id, name=record["name"], age=record["age"])
     try:
         user.save()
     except:
-        return jsonify({"success": False}), 400
-    return jsonify({"success": True}), 201
+        return jsonify({"message": "Can't save user."}), 400
+    return jsonify({"id": user.id, "name": user.name, "age": user.age}), 201
 
 
 @app.route("/users/<id>", methods=["PUT"])
 def update_user(id):
+    if not isinstance(id, int) or id < 0:
+        raise InvalidIdError()
+
     record = json.loads(request.data)
+
+    if "age" in record and not isinstance(record["age"], int):
+        raise InvalidAgeError()
+
+    if len(User.objects(name=record["name"])) > 0:
+        raise NameAlreadyExistsError()
+
     user = User.objects(id=id).first()
     if not user:
-        return jsonify({"success": False}), 400
+        raise UserNotFoundError()
     else:
-        user.update(name=record["name"])
+        if "name" in record.keys():
+            user.update(name=record["name"])
         if "age" in record.keys():
             user.update(age=record["age"])
         user.save()
-        return jsonify({"success": True}), 201
+        return jsonify({"id": user.id, "name": user.name, "age": user.age}), 201
 
 
 @app.route("/users/<id>", methods=["DELETE"])
 def delete_user(id):
+    if not isinstance(id, int) or id < 0:
+        raise InvalidIdError()
+
     user = User.objects(id=id).first()
     if not user:
-        return jsonify({"success": False}), 400
+        return UserNotFoundError()
     else:
         user.delete()
-        return jsonify({"success": True}), 200
+        return jsonify({"id": user.id, "name": user.name, "age": user.age}), 200
 
 
 if __name__ == "__main__":
