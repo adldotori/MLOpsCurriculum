@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 
 from .model import db
 from .routes import user_bp
+from .error import error_handle
 
 app = Flask(__name__)
 app.config["MONGODB_SETTINGS"] = {
@@ -15,7 +16,7 @@ app.config["MONGODB_SETTINGS"] = {
     "password": os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
 }
 db.init_app(app)
-migrate = Migrate(app, db)
+error_handle(app)
 app.register_blueprint(user_bp, url_prefix="/users")
 
 

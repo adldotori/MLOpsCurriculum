@@ -9,7 +9,6 @@ from .error import (
     NameAlreadyExistsError,
     InvalidIdError,
     InvalidAgeError,
-    error_handle,
 )
 
 
@@ -38,7 +37,7 @@ class Controller(Singleton):
         user = cls.user.objects(id=id).first()
 
         if not user:
-            return UserNotFoundError()
+            raise UserNotFoundError()
         else:
             return jsonify(user.to_json()), 200
 
@@ -98,7 +97,7 @@ class Controller(Singleton):
 
         user = cls.user.objects(id=id).first()
         if not user:
-            return UserNotFoundError()
+            raise UserNotFoundError()
         else:
             user.delete()
             return jsonify({"id": user.id, "name": user.name, "age": user.age}), 200
