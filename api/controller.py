@@ -2,7 +2,7 @@ import json
 
 from flask import request, jsonify
 
-from .model import User, db
+from .model import db
 from .error import (
     UserNotFoundError,
     NameIsEmptyError,
@@ -13,83 +13,92 @@ from .error import (
 )
 
 
-def get_all_users():
-    user = User.objects.all()
-    return jsonify([i.to_json() for i in user]), 200
+class Singleton(object):
+    _instance = None
+
+    def __new__(class_, *args, **kwargs):
+        if not isinstance(class_._instance, class_):
+            class_._instance = object.__new__(class_)
+        return class_._instance
 
 
-def get_user(id):
-    if not isinstance(id, int) or id < 0:
-        raise InvalidIdError()
+class Controller(Singleton):
+    def __init__(self, user):
+        Controller.user = user
 
-    user = User.objects(id=id).first()
+    @classmethod
+    def get_all_users(cls):
+        user = cls.user.objects.all()
+        return jsonify([i.to_json() for i in user]), 200
 
-    if not user:
-        return UserNotFoundError()
-    else:
-        return jsonify(user.to_json()), 200
+    def get_user(cls, id):
+        if not isinstance(id, int) or id < 0:
+            raise InvalidIdError()
 
+        user = cls.user.objects(id=id).first()
 
-def create_user():
-    record = json.loads(request.data)
+        if not user:
+            return UserNotFoundError()
+        else:
+            return jsonify(user.to_json()), 200
 
-    if "name" not in record:
-        raise NameIsEmptyError()
+    @classmethod
+    def create_user(cls):
+        record = json.loads(request.data)
 
-    if "age" in record and not isinstance(record["age"], int):
-        raise InvalidAgeError()
+        if "name" not in record:
+            raise NameIsEmptyError()
 
-    if len(User.objects(name=record["name"])) > 0:
-        raise NameAlreadyExistsError()
+        if "age" in record and not isinstance(record["age"], int):
+            raise InvalidAgeError()
 
-    if len(User.objects.all()) > 0:
-        id = User.objects.all().order_by("-id").first()["id"] + 1
-    else:
-        id = 1
+        if len(cls.user.objects(name=record["name"])) > 0:
+            raise NameAlreadyExistsError()
 
-    user = User(id=id, name=record["name"], age=record["age"])
-    try:
-        user.save()
-    except:
-        return jsonify({"message": "Can't save user."}), 400
-    return jsonify({"id": user.id, "name": user.name, "age": user.age}), 201
+        if len(cls.user.objects.all()) > 0:
+            id = User.objects.all().order_by("-id").first()["id"] + 1
+        else:
+            id = 1
 
-
-def update_user(id):
-    if not isinstance(id, int) or id < 0:
-        raise InvalidIdError()
-
-    record = json.loads(request.data)
-
-    if "age" in record and not isinstance(record["age"], int):
-        raise InvalidAgeError()
-
-    if len(User.objects(name=record["name"])) > 0:
-        raise NameAlreadyExistsError()
-
-    user = User.objects(id=id).first()
-    if not user:
-        raise UserNotFoundError()
-    else:
-        if "name" in record.keys():
-            user.update(name=record["name"])
-        if "age" in record.keys():
-            user.update(age=record["age"])
-        user.save()
+        user = cls.user(id=id, name=record["name"], age=record["age"])
+        try:
+            user.save()
+        except:
+            return jsonify({"message": "Can't save user."}), 400
         return jsonify({"id": user.id, "name": user.name, "age": user.age}), 201
 
+    @classmethod
+    def update_user(cls, id):
+        if not isinstance(id, int) or id < 0:
+            raise InvalidIdError()
 
-def delete_user(id):
-    if not isinstance(id, int) or id < 0:
-        raise InvalidIdError()
+        record = json.loads(request.data)
 
-    user = User.objects(id=id).first()
-    if not user:
-        return UserNotFoundError()
-    else:
-        user.delete()
-        return jsonify({"id": user.id, "name": user.name, "age": user.age}), 200
+        if "age" in record and not isinstance(record["age"], int):
+            raise InvalidAgeError()
 
+        if len(cls.user.objects(name=record["name"])) > 0:
+            raise NameAlreadyExistsError()
 
-if __name__ == "__main__":
-    app.run(debug=True)
+        user = cls.user.objects(id=id).first()
+        if not user:
+            raise UserNotFoundError()
+        else:
+            if "name" in record.keys():
+                user.update(name=record["name"])
+            if "age" in record.keys():
+                user.update(age=record["age"])
+            user.save()
+            return jsonify({"id": user.id, "name": user.name, "age": user.age}), 201
+
+    @classmethod
+    def delete_user(cls, id):
+        if not isinstance(id, int) or id < 0:
+            raise InvalidIdError()
+
+        user = cls.user.objects(id=id).first()
+        if not user:
+            return UserNotFoundError()
+        else:
+            user.delete()
+            return jsonify({"id": user.id, "name": user.name, "age": user.age}), 200

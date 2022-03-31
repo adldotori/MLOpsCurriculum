@@ -1,4 +1,5 @@
 import os
+from abc import ABC, abstractmethod
 
 from flask import Flask
 from flask_mongoengine import MongoEngine
