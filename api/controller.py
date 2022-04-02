@@ -30,6 +30,7 @@ class Controller(Singleton):
         user = cls.user.objects.all()
         return jsonify([i.to_json() for i in user]), 200
 
+    @classmethod
     def get_user(cls, id):
         if not isinstance(id, int) or id < 0:
             raise InvalidIdError()
