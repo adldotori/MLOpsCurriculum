@@ -40,8 +40,8 @@ You can view services create for the Compose appliciation on Amazon ECS and thei
 
 ## Phase1.
 
-- EC2 endpoint: 13.125.249.80:5000
-- ECS endpoint: 3.34.122.192:5000
+- EC2 endpoint: http://3.37.129.150:5000/
+- ECS endpoint: http://3.34.201.203:5000/
 
 ### Summary
 
