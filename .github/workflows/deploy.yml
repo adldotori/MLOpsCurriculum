@@ -38,7 +38,7 @@ env:
   ECS_SERVICE: mlopscurriculum-BackendService-bL563xEvZIw3 # set this to your Amazon ECS service name
   ECS_CLUSTER: mlopscurriculum # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION:
-    .aws/task-definition.json # set this to the path to your Amazon ECS task definition
+    task-definition.json # set this to the path to your Amazon ECS task definition
     # file, e.g. .aws/task-definition.json
   CONTAINER_NAME:
     backend # set this to the name of the container in the
@@ -77,6 +77,11 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE }} \
+          --query taskDefinition > ${{ env.ECS_TASK_DEFINITION }}
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
