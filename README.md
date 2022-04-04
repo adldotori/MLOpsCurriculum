@@ -4,17 +4,23 @@ I’m an MLOps Engineer at Corca.
 
 ## Usage
 
-In local environment
+Run in local environment
 
 ```
 $ pip install -r requirements.txt
 $ export FLASK_APP=api/app.py; flask run
 ```
 
-In docker container
+Run in docker container
 
 ```
 $ docker-compose up
+```
+
+Test
+
+```
+$ pytest
 ```
 
 ## Deploy to ECS
