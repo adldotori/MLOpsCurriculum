@@ -45,7 +45,6 @@ requests==2.27.1
 roundrobin==0.0.2
 sentinels==1.0.0
 six==1.16.0
-SQLAlchemy==1.4.33
 tomli==2.0.1
 typing_extensions==4.1.1
 urllib3==1.26.8
