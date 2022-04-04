@@ -56,7 +56,7 @@ class Controller(Singleton):
             raise NameAlreadyExistsError()
 
         if len(cls.user.objects.all()) > 0:
-            id = User.objects.all().order_by("-id").first()["id"] + 1
+            id = cls.user.objects.all().order_by("-id").first()["id"] + 1
         else:
             id = 1
 
@@ -89,6 +89,9 @@ class Controller(Singleton):
             if "age" in record.keys():
                 user.update(age=record["age"])
             user.save()
+
+            user = cls.user.objects.get(id=id)
+
             return jsonify({"id": user.id, "name": user.name, "age": user.age}), 201
 
     @classmethod
