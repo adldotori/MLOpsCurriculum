@@ -1,0 +1,134 @@
+{
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:854407906105:task-definition/mlopscurriculum-backend:15",
+    "containerDefinitions": [
+        {
+            "name": "Backend_ResolvConf_InitContainer",
+            "image": "docker/ecs-searchdomain-sidecar:1.0",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": false,
+            "command": [
+                "ap-northeast-2.compute.internal",
+                "mlopscurriculum.local"
+            ],
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/docker-compose/mlopscurriculum",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "mlopscurriculum"
+                }
+            }
+        },
+        {
+            "name": "backend",
+            "image": "854407906105.dkr.ecr.ap-northeast-2.amazonaws.com/mlopscurriculum:ee66f513ee604929bfa9015ab80cda1f6d7c7031",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 5000,
+                    "hostPort": 5000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "FLASK_APP",
+                    "value": "api/app.py"
+                },
+                {
+                    "name": "MONGO_HOST",
+                    "value": "mongodb"
+                },
+                {
+                    "name": "MONGO_PORT",
+                    "value": "27017"
+                },
+                {
+                    "name": "BACKEND_PORT",
+                    "value": "5000"
+                },
+                {
+                    "name": "MONGO_INITDB_ROOT_PASSWORD",
+                    "value": "123"
+                },
+                {
+                    "name": "MONGO_INITDB_ROOT_USERNAME",
+                    "value": "root"
+                },
+                {
+                    "name": "BACKEND_ECR_PATH",
+                    "value": "854407906105.dkr.ecr.ap-northeast-2.amazonaws.com/mlopscurriculum:taeho-0.0.2"
+                },
+                {
+                    "name": "MONGO_INITDB_DATABASE",
+                    "value": "mlops"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "dependsOn": [
+                {
+                    "containerName": "Backend_ResolvConf_InitContainer",
+                    "condition": "SUCCESS"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/docker-compose/mlopscurriculum",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "mlopscurriculum"
+                }
+            }
+        }
+    ],
+    "family": "mlopscurriculum-backend",
+    "executionRoleArn": "arn:aws:iam::854407906105:role/mlopscurriculum-BackendTaskExecutionRole-177SYOCFA6T6",
+    "networkMode": "awsvpc",
+    "revision": 15,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "ecs.capability.container-ordering"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "registeredAt": 1649155813.126,
+    "registeredBy": "arn:aws:iam::854407906105:user/mlopscurriculum"
+}
